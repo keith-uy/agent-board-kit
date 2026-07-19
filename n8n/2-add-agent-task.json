@@ -1,0 +1,65 @@
+{
+  "name": "Add Agent Task (voice capture)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "add-agent-task-REPLACE-WITH-LONG-RANDOM",
+        "responseMode": "onReceived",
+        "responseCode": 200,
+        "responseData": "noData",
+        "options": {}
+      },
+      "id": "webhook-capture",
+      "name": "Capture Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [420, 300],
+      "webhookId": "add-agent-task",
+      "notes": "The phone Shortcut POSTs {\"task\":\"<dictated text>\"} here. Responds 200 immediately. The random string in the path IS the auth."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.clickup.com/api/v2/list/REPLACE_WITH_YOUR_LIST_ID/task",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [
+          {"name": "Authorization", "value": "REPLACE_WITH_YOUR_CLICKUP_TOKEN"}
+        ]},
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"name\": $json.body.task || $json.body.Value, \"status\": \"Next\", \"tags\": [\"agent-ready\"] } }}",
+        "options": {}
+      },
+      "id": "create-task",
+      "name": "Create ClickUp Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 300],
+      "notes": "Creates the task already set to Next + agent-ready so the worker claims it. Paste your pk_ token in the Authorization header (stays in n8n, never the repo). The `|| $json.body.Value` fallback tolerates the iOS Shortcuts JSON-body quirk that sends {Key,Value} instead of {task}."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ntfy.sh/REPLACE-WITH-YOUR-SECRET-NTFY-TOPIC",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "text/plain",
+        "body": "kick",
+        "options": {}
+      },
+      "id": "ntfy-publish",
+      "name": "Ping ntfy (wake Mac)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [980, 300],
+      "notes": "A brand-new task doesn't reliably emit taskStatusUpdated/taskTagUpdated, so ping the wake path directly. Same ntfy topic as workflow 1."
+    }
+  ],
+  "connections": {
+    "Capture Webhook": {"main": [[{"node": "Create ClickUp Task", "type": "main", "index": 0}]]},
+    "Create ClickUp Task": {"main": [[{"node": "Ping ntfy (wake Mac)", "type": "main", "index": 0}]]}
+  },
+  "settings": {"executionOrder": "v1"}
+}

@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voice-to-Agent Board — WinflowAI</title>
+<style>
+  :root{
+    --teal:#2EC4B6; --teal-tint:#E7F8F6; --gold:#FFB800; --gold-tint:#FFF4D6;
+    --ink:#0E1116; --body:#3A414B; --line:#E7EAEE; --bg:#FFFFFF; --panel:#F7F9FA;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--body);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    line-height:1.6; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1000px; margin:0 auto; padding:0 24px}
+  h1,h2,h3{color:var(--ink); line-height:1.2; margin:0}
+  .brand{display:inline-block; font-weight:800; letter-spacing:-.02em; color:var(--ink); font-size:19px}
+  .brand u{text-decoration:none; border-bottom:3px solid var(--teal); padding-bottom:1px}
+  .brand u b{color:var(--gold); font-weight:800}
+  header{border-bottom:1px solid var(--line)}
+  header .wrap{display:flex; align-items:center; justify-content:space-between; height:64px}
+  .tag{color:var(--body); font-size:13px}
+
+  .hero{padding:64px 0 44px}
+  .kicker{display:inline-block; background:var(--teal-tint); color:#137a70; font-weight:700;
+    font-size:12.5px; letter-spacing:.04em; text-transform:uppercase; padding:6px 12px; border-radius:999px}
+  .hero h1{font-size:clamp(30px,5vw,46px); font-weight:800; letter-spacing:-.02em; margin:18px 0 14px}
+  .hero p{font-size:18px; max-width:680px; margin:0}
+  .hero .accent{color:var(--ink); font-weight:700}
+
+  .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin:36px 0}
+  .stat{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:20px}
+  .stat .n{font-size:26px; font-weight:800; color:var(--ink); letter-spacing:-.02em}
+  .stat .n span{color:var(--teal)}
+  .stat .l{font-size:14px; margin-top:4px}
+
+  section{padding:24px 0}
+  h2{font-size:24px; font-weight:800; letter-spacing:-.01em; margin-bottom:6px}
+  .sub{margin:0 0 22px; color:var(--body)}
+
+  /* pipeline */
+  .flow{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:26px 22px; overflow-x:auto}
+  .row{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  .node{background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px 14px; font-size:14px; font-weight:600; color:var(--ink); white-space:nowrap}
+  .node.k{background:var(--ink); color:#fff; border-color:var(--ink)}
+  .node.t{background:var(--teal-tint); border-color:#bfeae5; color:#0f7a70}
+  .node.g{background:var(--gold-tint); border-color:#f2dc9a; color:#8a6a00}
+  .ar--{color:#9aa3ad; font-weight:800}
+  .flow .cap{font-size:12.5px; color:var(--body); margin:14px 2px 0}
+
+  .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:16px}
+  .card{border:1px solid var(--line); border-radius:14px; padding:20px; background:#fff}
+  .card h3{font-size:16px; font-weight:800; margin-bottom:6px}
+  .card h3 .dot{display:inline-block; width:8px; height:8px; border-radius:3px; background:var(--teal); margin-right:8px; vertical-align:middle}
+  .card p{margin:0; font-size:14.5px}
+
+  .steps{counter-reset:s; display:grid; gap:12px}
+  .step{display:flex; gap:14px; align-items:flex-start}
+  .step .b{counter-increment:s; flex:0 0 28px; height:28px; border-radius:8px; background:var(--ink); color:#fff; font-weight:800; font-size:14px; display:flex; align-items:center; justify-content:center}
+  .step .b::before{content:counter(s)}
+  .step p{margin:2px 0 0; font-size:14.5px}
+  .step b{color:var(--ink)}
+
+  .cta{margin:40px 0 60px; background:var(--ink); color:#fff; border-radius:18px; padding:30px 28px}
+  .cta h2{color:#fff; margin-bottom:8px}
+  .cta p{color:#c7ced6; margin:0 0 16px}
+  .pill{display:inline-block; background:var(--gold); color:#1a1400; font-weight:800; text-decoration:none; padding:11px 20px; border-radius:999px; font-size:15px}
+  .cta a.link{color:var(--teal); font-weight:700; text-decoration:none; margin-left:16px}
+
+  footer{border-top:1px solid var(--line); padding:22px 0; color:#8a929c; font-size:13px}
+  @media(max-width:720px){ .stats{grid-template-columns:1fr} .grid{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <span class="brand">Winflow<u>A<b>I</b></u></span>
+  <span class="tag">Simple automation for complex work</span>
+</div></header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <span class="kicker">Voice-to-Agent Board</span>
+    <h1>Speak a task. An AI agent does it. The result lands on your board.</h1>
+    <p>A self-hosted system that turns one ClickUp list into a shared human + AI workspace. Dictate a task from your phone, and a local agent claims it, does the work, checks its own output, and reports back. <span class="accent">It runs on your Claude subscription, so there is no API bill.</span></p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="n"><span>$0</span> API cost</div><div class="l">Runs through local Claude Code on your subscription, not the metered API.</div></div>
+    <div class="stat"><div class="n"><span>~2s</span> pickup</div><div class="l">Event-driven wake via webhook and push, not slow polling.</div></div>
+    <div class="stat"><div class="n"><span>All</span> devices</div><div class="l">Native ClickUp notifications when the agent needs you or stalls.</div></div>
+  </div>
+
+  <section>
+    <h2>How it flows</h2>
+    <p class="sub">From your voice to a finished result, with a human in the loop only when it matters.</p>
+    <div class="flow">
+      <div class="row">
+        <span class="node">🎙️ Dictate on phone</span><span class="ar--">→</span>
+        <span class="node t">n8n</span><span class="ar--">→</span>
+        <span class="node">ClickUp task<br>Next + agent-ready</span><span class="ar--">→</span>
+        <span class="node t">ntfy kick</span><span class="ar--">→</span>
+        <span class="node k">Local worker · claude -p</span><span class="ar--">→</span>
+        <span class="node g">🤖 Result comment</span>
+      </div>
+      <div class="cap">Needs your input? The task moves to Waiting and ClickBot @mentions you on every device. Mac asleep and a task waiting? A cloud watchdog pings you, and queued work runs the moment your Mac wakes.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What makes it hold up</h2>
+    <p class="sub">The demo is easy. The reliability is the work.</p>
+    <div class="grid">
+      <div class="card"><h3><span class="dot"></span>Runs on your plan</h3><p>The agent executes through your local Claude Code CLI on a Pro or Max subscription. No per-token metering, no surprise bill.</p></div>
+      <div class="card"><h3><span class="dot"></span>Two-way collaboration</h3><p>When the agent hits a wall, it asks. You reply in a ClickUp comment and it resumes from your answer, no restart.</p></div>
+      <div class="card"><h3><span class="dot"></span>Self-healing</h3><p>A watchdog catches stuck tasks (Mac asleep or worker down) and alerts you once. On wake, queued work runs in seconds.</p></div>
+      <div class="card"><h3><span class="dot"></span>Safe by default</h3><p>The worker runs in Claude Code auto mode, where a safety classifier reviews every action, plus a hard deny-list for destructive commands.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Under the hood</h2>
+    <p class="sub">Five pieces, each independently testable.</p>
+    <div class="steps">
+      <div class="step"><div class="b"></div><p><b>The worker.</b> A stdlib-Python loop that claims Next + agent-ready tasks, runs headless Claude, grades the output against evals, runs a publish-safety check, and writes the result back.</p></div>
+      <div class="step"><div class="b"></div><p><b>Event-driven wake.</b> A ClickUp webhook to n8n to an ntfy topic your Mac subscribes to over an outbound stream. No inbound port, no tunnel.</p></div>
+      <div class="step"><div class="b"></div><p><b>Voice capture.</b> An iPhone Shortcut dictates and posts a task through n8n, wired to Back Tap, Siri, or a home-screen icon.</p></div>
+      <div class="step"><div class="b"></div><p><b>Native notifications.</b> A ClickUp Automation posts as ClickBot so an @mention actually reaches you, sidestepping self-notification suppression.</p></div>
+      <div class="step"><div class="b"></div><p><b>Watchdog.</b> A cloud schedule flags any task left unworked past 15 minutes and pings you, so nothing silently rots.</p></div>
+    </div>
+  </section>
+
+  <div class="cta">
+    <h2>Want this running for your team?</h2>
+    <p>The full build kit is open and reproducible. Or have it set up for you, tailored to your stack and SOPs.</p>
+    <a class="pill" href="https://winflowai.com">winflowai.com</a>
+    <a class="link" href="./SETUP.md">Read the build guide →</a>
+  </div>
+
+</div>
+
+<footer><div class="wrap">Built by Keith Uy · WinflowAI · Simple automation for complex work.</div></footer>
+</body>
+</html>

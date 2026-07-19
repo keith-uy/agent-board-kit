@@ -1,0 +1,11 @@
+# Secrets and runtime state — NEVER commit these
+**/.env
+**/state/
+**/workspace/
+**/__pycache__/
+*.pyc
+
+# Your real knowledge base (keep only the *.example.md templates in git)
+worker/knowledge-base/*.md
+!worker/knowledge-base/*.example.md
+!worker/knowledge-base/README.md

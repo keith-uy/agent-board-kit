@@ -1,0 +1,64 @@
+{
+  "name": "Agent Watchdog (stuck-task alert)",
+  "nodes": [
+    {
+      "parameters": {"rule": {"interval": [{"field": "minutes", "minutesInterval": 15}]}},
+      "id": "sched", "name": "Every 15 min",
+      "type": "n8n-nodes-base.scheduleTrigger", "typeVersion": 1.2,
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.clickup.com/api/v2/list/REPLACE_WITH_YOUR_LIST_ID/task",
+        "sendQuery": true,
+        "queryParameters": {"parameters": [
+          {"name": "statuses[]", "value": "Next"},
+          {"name": "tags[]", "value": "agent-ready"},
+          {"name": "date_updated_lt", "value": "={{ $now.minus({ minutes: 15 }).toMillis() }}"},
+          {"name": "archived", "value": "false"},
+          {"name": "subtasks", "value": "false"}
+        ]},
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [
+          {"name": "Authorization", "value": "REPLACE_WITH_YOUR_CLICKUP_TOKEN"}
+        ]},
+        "options": {}
+      },
+      "id": "getstuck", "name": "Find stuck tasks",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2,
+      "position": [640, 300],
+      "notes": "Tasks that are Next + agent-ready and untouched for 15+ min. Paste your pk_ token in the Authorization header."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Keep only tasks that are genuinely stuck: agent-ready (query filtered) but\n// NOT yet claimed and NOT already flagged stalled (so we alert once per task).\nconst tasks = ($input.first().json.tasks) || [];\nconst out = [];\nfor (const t of tasks) {\n  const tags = (t.tags || []).map(x => x.name);\n  if (tags.includes('agent-claimed')) continue;\n  if (tags.includes('agent-stalled')) continue;\n  out.push({ json: { task_id: t.id, name: t.name } });\n}\nreturn out;\n"
+      },
+      "id": "filter", "name": "Only truly stuck",
+      "type": "n8n-nodes-base.code", "typeVersion": 2,
+      "position": [880, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.clickup.com/api/v2/task/={{ $json.task_id }}/tag/agent-stalled",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [
+          {"name": "Authorization", "value": "REPLACE_WITH_YOUR_CLICKUP_TOKEN"}
+        ]},
+        "options": {}
+      },
+      "id": "flag", "name": "Flag agent-stalled",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2,
+      "position": [1120, 300],
+      "notes": "Adds the agent-stalled tag, which fires the ClickUp Automation that @mentions you via ClickBot."
+    }
+  ],
+  "connections": {
+    "Every 15 min": {"main": [[{"node": "Find stuck tasks", "type": "main", "index": 0}]]},
+    "Find stuck tasks": {"main": [[{"node": "Only truly stuck", "type": "main", "index": 0}]]},
+    "Only truly stuck": {"main": [[{"node": "Flag agent-stalled", "type": "main", "index": 0}]]}
+  },
+  "settings": {"executionOrder": "v1"}
+}
