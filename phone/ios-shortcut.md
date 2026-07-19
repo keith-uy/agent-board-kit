@@ -29,6 +29,18 @@ Build a Shortcut that dictates a task and posts it to your board via the n8n cap
 - **Siri:** just say "Hey Siri, <the Shortcut's name>".
 - **Home/Lock screen:** Shortcut ⋯ → Add to Home Screen, or a Lock Screen widget.
 
+## On iPad (or any second device)
+
+The Shortcut **syncs automatically** via iCloud (Settings → Apps → Shortcuts → iCloud Sync, same Apple ID) — no rebuild. But iPad has **no Back Tap and no Action Button**, so use one of these triggers instead:
+
+- **Siri** — "Hey Siri, <Shortcut name>". Fully hands-free, the best default.
+- **AssistiveTouch** (the Back Tap replacement): Settings → Accessibility → Touch → AssistiveTouch → On, then **Custom Actions** → assign **Long Press** (or Double-Tap) to run this Shortcut. A floating button is then one gesture from dictation.
+- **Home/Lock screen or Today widget** — add an icon or a Shortcuts widget.
+- **Control Center** (iPadOS 18+) — add a Shortcuts control.
+- **Spotlight** — swipe down, type the Shortcut name, return.
+
+> Permissions are **per-device**: the first run on a new device re-prompts for **microphone/speech** and **"Allow to contact your n8n host"**. Tap Allow on both, or it silently fails.
+
 ## Gotchas (learned the hard way)
 
 - **The URL must be the `/webhook/` Production URL**, not the `/webhook-test/` one (test URLs fire once).
