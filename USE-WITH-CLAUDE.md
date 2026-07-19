@@ -9,8 +9,11 @@ You can hand the whole build to Claude Code. Open this folder in your terminal, 
 ## Prompt to paste into Claude Code
 
 ```
-You're helping me install the Voice-to-Agent Board in this repo. Read SETUP.md and
-implement it with me, phase by phase, in order. Rules:
+You're helping me install the Voice-to-Agent Board in this repo. First read
+DEPLOYMENT.md and ask me which mode I want: A (local Mac + Claude subscription, $0 API
+but tied to my Mac being awake) or B (always-on server + Anthropic API, metered but
+24/7). Briefly give me the tradeoff, then configure that mode (you can run ./configure.sh).
+Then read SETUP.md and implement it with me, phase by phase, in order. Rules:
 
 - Do every [machine] step yourself (edit .env files, run scripts, install launchd jobs,
   register the ClickUp webhook). Never print my secrets back to the chat.

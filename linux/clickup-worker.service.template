@@ -1,0 +1,27 @@
+# systemd unit for the always-on (Profile B / API) deployment.
+# Install:
+#   sudo cp linux/clickup-worker.service.template /etc/systemd/system/clickup-worker.service
+#   sudo nano /etc/systemd/system/clickup-worker.service   # edit the 3 REPLACE lines below
+#   sudo systemctl daemon-reload && sudo systemctl enable --now clickup-worker
+#   journalctl -u clickup-worker -f
+#
+# The worker reads its config (incl. ANTHROPIC_API_KEY) from worker/.env itself,
+# so no EnvironmentFile is needed. But `claude` must be on PATH — set it below.
+
+[Unit]
+Description=ClickUp Agent Worker
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=REPLACE_WITH_YOUR_LINUX_USER
+WorkingDirectory=/REPLACE/PATH/TO/agent-board-kit/worker
+# Make sure the directory that contains the `claude` CLI is on PATH:
+Environment=PATH=/usr/local/bin:/usr/bin:/bin:/home/REPLACE_WITH_YOUR_LINUX_USER/.local/bin
+ExecStart=/usr/bin/env python3 /REPLACE/PATH/TO/agent-board-kit/worker/clickup_worker.py
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

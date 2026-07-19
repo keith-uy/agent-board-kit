@@ -38,17 +38,28 @@ Built by **[WinflowAI](https://winflowai.com)** — simple automation for comple
  Cloud watchdog (n8n schedule): task stuck 15+ min → tag agent-stalled → ClickBot @mentions you
 ```
 
+## Two ways to run it
+
+Pick based on one question: **do you mind the agent only working while your Mac is awake?**
+
+- **Local + Subscription** — runs on your Mac via Claude Code login. **$0 API cost**, but only works while the Mac is awake. Best for personal, cost-sensitive use.
+- **Server + API** — runs on any always-on box (cloud VM, home server, Pi) via an Anthropic API key. **Metered cost**, but works **24/7** regardless of your devices — dictate a task on the go and it's done whether your Mac is on or not.
+
+Full tradeoff table and the always-on server setup are in **[`DEPLOYMENT.md`](./DEPLOYMENT.md)**. The interactive `./configure.sh` sets either up.
+
 ## What you need
 
-- A **Mac** that's on when you want work to run (the agent executes locally).
-- **[Claude Code](https://claude.com/claude-code)** installed and logged in (`claude login`) on a **Pro/Max plan** (Opus 4.6+ needed for `auto` mode).
+- **Local mode:** a **Mac** that's on when you want work to run. **Server mode:** any always-on Linux box.
+- **[Claude Code](https://claude.com/claude-code)** installed. Local mode also needs `claude login` on a **Pro/Max plan** (for `auto` mode). Server mode needs an **Anthropic API key**.
 - A **ClickUp** account (Free Forever works) + a personal API token.
 - An **n8n** instance with a public webhook URL (n8n Cloud is easiest).
-- An **iPhone** (optional — only for voice capture).
+- An **iPhone/iPad** (optional — only for voice capture).
 
 ## Get started
 
-👉 **Follow [`SETUP.md`](./SETUP.md)** for the full step-by-step build.
+1. **Choose a mode:** read [`DEPLOYMENT.md`](./DEPLOYMENT.md).
+2. **Configure:** run `./configure.sh` (it asks which mode and writes your config), or copy `worker/.env.example`.
+3. **Build it:** follow 👉 **[`SETUP.md`](./SETUP.md)** step by step.
 
 Doing it with Claude Code? Open this folder in Claude Code and see **[`USE-WITH-CLAUDE.md`](./USE-WITH-CLAUDE.md)** for a prompt that walks it through for you.
 

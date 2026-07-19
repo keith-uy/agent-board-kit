@@ -11,6 +11,16 @@ Build the whole system in order. Each phase is independently testable, so stop a
 
 ---
 
+## Choose your deployment first
+
+Before Phase 0, decide **[`DEPLOYMENT.md`](./DEPLOYMENT.md)**:
+- **A · Local + Subscription** — on your Mac, $0 API, works while the Mac is awake. (This guide's default.)
+- **B · Server + API** — on an always-on box, metered, 24/7.
+
+The build below is written for **Profile A**. For **Profile B**, the only differences are: set `AUTH_MODE=api` + `PERMISSION_MODE=bypassPermissions` in Phase 2, run the worker under **systemd** instead of launchd (`linux/clickup-worker.service.template`), and treat the wake webhook (Phase 3) + watchdog (Phase 6) as optional (a server can just poll). See `DEPLOYMENT.md` Profile B.
+
+---
+
 ## Phase 0 — Prerequisites [you]
 
 1. A **Mac**, on when you want work to run.
@@ -39,19 +49,27 @@ The board is one ClickUp **list** with four statuses and a few tags. See `clicku
 
 ## Phase 2 — The worker (local execution)
 
-1. **[machine]** Configure the worker:
+1. **[machine]** Configure the worker. Easiest: run the interactive script, which asks
+   which deployment mode and writes `worker/.env` + the deny-list for you:
    ```bash
-   cp worker/.env.example worker/.env
+   ./configure.sh
    ```
-   Edit `worker/.env` and set at least:
+   Or do it by hand — `cp worker/.env.example worker/.env` and set at least:
    ```
    CLICKUP_TOKEN=YOUR_CLICKUP_TOKEN
    CLICKUP_LIST_ID=YOUR_LIST_ID
-   AUTH_MODE=subscription        # draws your Claude plan; $0 API
-   PERMISSION_MODE=auto          # safety classifier reviews each action
-   CLAUDE_MODEL=claude-opus-4-8  # any current Opus/Sonnet that supports `auto`
-   POLL_SECONDS=600              # backstop; webhooks carry real-time
+   # Profile A (local + subscription):
+   AUTH_MODE=subscription
+   PERMISSION_MODE=auto          # safety classifier; needs a Claude plan
+   POLL_SECONDS=600              # backstop; the wake webhook carries real-time
+   # Profile B (server + API) instead:
+   #   AUTH_MODE=api
+   #   ANTHROPIC_API_KEY=sk-ant-...
+   #   PERMISSION_MODE=bypassPermissions   # only on an isolated server/VM
+   #   POLL_SECONDS=60
+   CLAUDE_MODEL=claude-opus-4-8
    ```
+   (`configure.sh` also writes step 2's deny-list, so you can skip step 2 if you used it.)
 2. **[machine]** Add the destructive-command deny-list (a hard block that applies in every permission mode):
    ```bash
    mkdir -p worker/workspace/.claude
@@ -70,10 +88,8 @@ The board is one ClickUp **list** with four statuses and a few tags. See `clicku
    ```
    Create a task in **Next** + tag **agent-ready** and confirm the worker claims it, runs, and comments a result.
 5. **[machine]** Install it as an always-on job:
-   ```bash
-   zsh launchd/install.sh
-   tail -f worker/state/launchd.log   # look for [start] and [wake] listening
-   ```
+   - **Profile A (Mac):** `zsh launchd/install.sh` then `tail -f worker/state/launchd.log` (look for `[start]` and `[wake] listening`).
+   - **Profile B (Linux server):** use `linux/clickup-worker.service.template` with systemd — see `DEPLOYMENT.md` Profile B.
 
 At this point you have a working agent board (poll-driven). The remaining phases add instant wakes, voice capture, notifications, and the watchdog.
 
