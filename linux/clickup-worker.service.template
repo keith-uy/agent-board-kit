@@ -16,10 +16,10 @@ Wants=network-online.target
 [Service]
 Type=simple
 User=REPLACE_WITH_YOUR_LINUX_USER
-WorkingDirectory=/REPLACE/PATH/TO/agent-board-kit/worker
+WorkingDirectory=/REPLACE/PATH/TO/ai-agent-task-board/worker
 # Make sure the directory that contains the `claude` CLI is on PATH:
 Environment=PATH=/usr/local/bin:/usr/bin:/bin:/home/REPLACE_WITH_YOUR_LINUX_USER/.local/bin
-ExecStart=/usr/bin/env python3 /REPLACE/PATH/TO/agent-board-kit/worker/clickup_worker.py
+ExecStart=/usr/bin/env python3 /REPLACE/PATH/TO/ai-agent-task-board/worker/clickup_worker.py
 Restart=always
 RestartSec=30
 
